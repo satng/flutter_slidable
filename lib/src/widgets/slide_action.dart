@@ -14,6 +14,7 @@ abstract class ClosableSlideAction extends StatelessWidget {
     Key key,
     this.color,
     this.onTap,
+    this.borderRadius,
     this.closeOnTap = _kCloseOnTap,
   })  : assert(closeOnTap != null),
         super(key: key);
@@ -29,6 +30,8 @@ abstract class ClosableSlideAction extends StatelessWidget {
   /// Defaults to true.
   final bool closeOnTap;
 
+  final BorderRadius borderRadius;
+
   /// Calls [onTap] if not null and closes the closest [Slidable]
   /// that encloses the given context.
   void _handleCloseAfterTap(BuildContext context) {
@@ -40,6 +43,8 @@ abstract class ClosableSlideAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Material(
+        borderRadius: this.borderRadius,
+        clipBehavior: borderRadius != null ? Clip.hardEdge : Clip.none,
         color: color,
         child: InkWell(
           onTap: !closeOnTap ? onTap : () => _handleCloseAfterTap(context),
@@ -73,19 +78,20 @@ class SlideAction extends ClosableSlideAction {
     Color color,
     Decoration decoration,
     bool closeOnTap = _kCloseOnTap,
+    BorderRadius borderRadius,
   })  : assert(child != null),
         assert(decoration == null || decoration.debugAssertIsValid()),
         assert(
             color == null || decoration == null,
             'Cannot provide both a color and a decoration\n'
             'The color argument is just a shorthand for "decoration:  BoxDecoration(color: color)".'),
-        decoration =
-            decoration ?? (color != null ? BoxDecoration(color: color) : null),
+        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
         super(
           key: key,
           onTap: onTap,
           closeOnTap: closeOnTap,
           color: color ?? Colors.transparent,
+          borderRadius: borderRadius,
         );
 
   /// The decoration to paint behind the [child].
@@ -125,8 +131,7 @@ class IconSlideAction extends ClosableSlideAction {
     VoidCallback onTap,
     bool closeOnTap = _kCloseOnTap,
   })  : color = color ?? Colors.white,
-        assert(icon != null || iconWidget != null,
-            'Either set icon or iconWidget.'),
+        assert(icon != null || iconWidget != null, 'Either set icon or iconWidget.'),
         super(
           key: key,
           color: color,
@@ -155,10 +160,7 @@ class IconSlideAction extends ClosableSlideAction {
 
   @override
   Widget buildAction(BuildContext context) {
-    final Color estimatedColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.light
-            ? Colors.black
-            : Colors.white;
+    final Color estimatedColor = ThemeData.estimateBrightnessForColor(color) == Brightness.light ? Colors.black : Colors.white;
 
     final List<Widget> widgets = [];
 
@@ -185,10 +187,7 @@ class IconSlideAction extends ClosableSlideAction {
           child: Text(
             caption,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .primaryTextTheme
-                .caption
-                .copyWith(color: foregroundColor ?? estimatedColor),
+            style: Theme.of(context).primaryTextTheme.caption.copyWith(color: foregroundColor ?? estimatedColor),
           ),
         ),
       );
